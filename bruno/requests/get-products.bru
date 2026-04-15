@@ -17,12 +17,6 @@ tests {
 
   test("returns a product collection payload", function () {
     const body = res.getBody();
-    const hasProductArray =
-      Array.isArray(body) ||
-      Array.isArray(body.products) ||
-      Array.isArray(body.items) ||
-      Array.isArray(body.data);
-
-    expect(hasProductArray).to.equal(true);
+    expect(Array.isArray(body)).to.equal(true);
   });
 }
