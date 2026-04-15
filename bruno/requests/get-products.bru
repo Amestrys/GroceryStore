@@ -18,5 +18,14 @@ tests {
   test("returns a product collection payload", function () {
     const body = res.getBody();
     expect(Array.isArray(body)).to.equal(true);
+    expect(body.length).to.be.greaterThan(0);
+
+    const first = body[0];
+    expect(first).to.be.an("object");
+    expect(first).to.have.property("id");
+
+    const hasProductName =
+      typeof first.name === "string" || typeof first.title === "string";
+    expect(hasProductName).to.equal(true);
   });
 }
