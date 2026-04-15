@@ -1,0 +1,28 @@
+meta {
+  name: Get products
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/products
+  body: none
+  auth: none
+}
+
+tests {
+  test("returns 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("returns a product collection payload", function () {
+    const body = res.getBody();
+    const hasProductArray =
+      Array.isArray(body) ||
+      Array.isArray(body.products) ||
+      Array.isArray(body.items) ||
+      Array.isArray(body.data);
+
+    expect(hasProductArray).to.equal(true);
+  });
+}
