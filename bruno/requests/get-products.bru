@@ -24,8 +24,7 @@ tests {
     expect(first).to.be.an("object");
     expect(first).to.have.property("id");
 
-    const hasProductName =
-      typeof first.name === "string" || typeof first.title === "string";
-    expect(hasProductName).to.equal(true);
+    expect(first).to.have.property("name");
+    expect(typeof first.name).to.equal("string");
   });
 }
