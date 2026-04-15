@@ -1,0 +1,30 @@
+info:
+  name: API Client
+  type: http
+  seq: 12
+
+http:
+  method: POST
+  url: https://simple-grocery-store-api.click/api-clients
+  body:
+    type: json
+    data: |-
+      {
+        "clientName": "A new client name",
+        "clientEmail": "client@order.com"
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: accessToken
+      operator: isDefined
+    - expression: res.status
+      operator: eq
+      value: "201"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

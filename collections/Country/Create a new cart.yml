@@ -1,0 +1,36 @@
+info:
+  name: Create a new cart
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{endpoint}}/carts"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const data = res.getBody();
+        bru.setEnvVar("cartId", data.cartId);
+    - type: tests
+      code: |-
+        const data = res.getBody();
+
+        test("Vérification valeur", function(){
+          expect(res.getStatus()).to.equal(201)
+          expect(data.created).to.equal(true);
+          expect(data.cartId).to.exist;
+          
+        });
+  assertions:
+    - expression: ""
+      operator: eq
+      value: ""
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

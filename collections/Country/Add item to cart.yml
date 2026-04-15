@@ -1,0 +1,41 @@
+info:
+  name: Add item to cart
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: "{{endpoint}}/carts/:cartId/items"
+  params:
+    - name: cartId
+      value: "{{cartId}}"
+      type: path
+  body:
+    type: json
+    data: |-
+      {
+        "productId": {{productId}},
+        "quantity": 5
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const data = res.getBody();
+
+        test("Vérification valeur", function(){
+          expect(res.getStatus()).to.equal(201)
+          expect(data.created).to.equal(true);
+        });
+  assertions:
+    - expression: ""
+      operator: eq
+      value: ""
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

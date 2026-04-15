@@ -1,0 +1,28 @@
+info:
+  name: Delete order
+  type: http
+  seq: 13
+
+http:
+  method: DELETE
+  url: "{{endpoint}}/orders/:orderId"
+  params:
+    - name: orderId
+      value: "{{orderId}}"
+      type: path
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const data = res.getBody();
+        expect(res.getStatus()).to.equal(204);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

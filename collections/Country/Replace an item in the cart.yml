@@ -1,0 +1,29 @@
+info:
+  name: Replace an item in the cart
+  type: http
+  seq: 10
+
+http:
+  method: PUT
+  url: "{{endpoint}}/carts/:cartId/items/:itemId"
+  params:
+    - name: cartId
+      value: "{{cartId}}"
+      type: path
+    - name: itemId
+      value: "{{itemId}}"
+      type: path
+  body:
+    type: json
+    data: |-
+      {
+        "productId":{{newProductId}},
+        "quantity": 2
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

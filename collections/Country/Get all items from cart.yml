@@ -1,0 +1,32 @@
+info:
+  name: Get all items from cart
+  type: http
+  seq: 8
+
+http:
+  method: GET
+  url: "{{endpoint}}/carts/:cartId/items"
+  params:
+    - name: cartId
+      value: "{{cartId}}"
+      type: path
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const data = res.getBody();
+        bru.setEnvVar("itemId", data[0].id);
+    - type: tests
+      code: |-
+        const data = res.getBody();
+
+        expect(res.getStatus()).to.equal(200)
+        expect(data[0].productId).to.equal(1225)
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

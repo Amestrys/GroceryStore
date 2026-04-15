@@ -1,0 +1,14 @@
+opencollection: 1.0.0
+info:
+  name: "WorkspaceOwn"
+  type: workspace
+
+collections:
+  - name: "Country"
+    path: "collections/Country"
+  - name: "Referentiel"
+    path: "collections/Referentiel"
+
+specs:
+
+docs: ''

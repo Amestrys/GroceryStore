@@ -1,0 +1,28 @@
+info:
+  name: Get A product
+  type: http
+  seq: 5
+
+http:
+  method: GET
+  url: "{{endpoint}}/products/:product"
+  params:
+    - name: product
+      value: "{{productId}}"
+      type: path
+  auth: inherit
+
+runtime:
+  variables:
+    - name: product
+      value: ""
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

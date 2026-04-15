@@ -1,0 +1,14 @@
+name: GroceryEnv
+variables:
+  - name: endpoint
+    value: https://simple-grocery-store-api.click
+  - name: token
+    value: 6988c5ee80e646a4ac7ebc5f4abe5315b1176d49298d784edb3fd1bb9d43e84f
+  - name: productId
+    value: ""
+  - name: cartId
+    value: bwsVHuVm42qEW_-eJoI26
+  - name: orderId
+    value: kO2HDonPVfh7A02549Xx5
+  - name: newProductId
+    value: ""

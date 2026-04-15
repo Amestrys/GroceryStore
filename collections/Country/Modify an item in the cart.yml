@@ -1,0 +1,33 @@
+info:
+  name: Modify an item in the cart
+  type: http
+  seq: 9
+
+http:
+  method: PATCH
+  url: "{{endpoint}}/carts/:cartId/items/:itemId"
+  params:
+    - name: cartId
+      value: "{{cartId}}"
+      type: path
+    - name: itemId
+      value: "{{itemId}}"
+      type: path
+  body:
+    type: json
+    data: |-
+      {
+        "quantity": 3
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: expect(res.getStatus()).to.equal(204)
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
