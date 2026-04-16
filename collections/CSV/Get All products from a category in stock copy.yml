@@ -1,0 +1,30 @@
+info:
+  name: Get All products from a category in stock copy
+  type: http
+  seq: 14
+
+http:
+  method: GET
+  url: https://simple-grocery-store-api.click/products?category={{category}}&available={{available}}&results={{results}}
+  params:
+    - name: category
+      value: "{{category}}"
+      type: query
+    - name: available
+      value: "{{available}}"
+      type: query
+    - name: results
+      value: "{{results}}"
+      type: query
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
