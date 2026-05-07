@@ -1,0 +1,24 @@
+{
+  "name": "grocerystore",
+  "version": "1.0.0",
+  "description": "Commande pour lancer les tests + env + reporting",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Amestrys/GroceryStore.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Amestrys/GroceryStore/issues"
+  },
+  "homepage": "https://github.com/Amestrys/GroceryStore#readme",
+  "devDependencies": {
+    "allure-commandline": "^2.40.0"
+  }
+}

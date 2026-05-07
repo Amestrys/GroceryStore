@@ -7,3 +7,9 @@ node_modules
 # OS files
 .DS_Store
 Thumbs.db
+
+# Allure reports
+allure-results/
+allure-report/
+
+report/
