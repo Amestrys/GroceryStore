@@ -18,7 +18,7 @@ bru run --csv-file-path ./data/dataset.csv --reporter-html ./report/bruno-result
 
 Tranformation bruno-results.json vers allure-results
 ````
-node bruno-to-allure.js
+node bruno-to-allure.js <chemin_vers_dossier>
 ```` 
 
 

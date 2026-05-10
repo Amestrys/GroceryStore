@@ -3,7 +3,15 @@ const crypto = require('crypto');
 const path = require('path');
 
 // Configuration
-const inputFile = 'bruno-results.json';
+const inputFolderArg = process.argv[2];
+if (!inputFolderArg) {
+    console.error('Erreur : Veuillez fournir le chemin vers le dossier contenant bruno-results.json.');
+    console.error('Usage : node bruno-to-allure.js <chemin/vers/dossier>');
+    process.exit(1);
+}
+
+const inputFolder = path.resolve(inputFolderArg);
+const inputFile = path.join(inputFolder, 'bruno-results.json');
 const outputDir = 'allure-results';
 
 // Créer le dossier allure-results s'il n'existe pas, ou le vider
@@ -13,7 +21,7 @@ if (!fs.existsSync(outputDir)) {
 
 // 1. Lire le fichier JSON généré par Bruno
 if (!fs.existsSync(inputFile)) {
-    console.error(`Erreur : Le fichier ${inputFile} est introuvable.`);
+    console.error(`Erreur : Le fichier bruno-results.json est introuvable dans le dossier "${inputFolder}".`);
     process.exit(1);
 }
 
@@ -32,76 +40,118 @@ results.forEach(test => {
     const durationMs = test.runDuration * 1000;
     const allureStatus = test.status === 'pass' ? 'passed' : 'failed';
 
-    // -- A. Création d'une pièce jointe (Attachment) pour la Requête / Réponse
-    const attachmentUuid = crypto.randomUUID();
-    const attachmentContent = JSON.stringify({
-        request: {
-            method: test.request.method,
-            url: test.request.url,
-            headers: test.request.headers,
-            body: test.request.data || null
-        },
-        response: {
-            status: test.response.status,
-            responseTime: test.response.responseTime,
-            headers: test.response.headers,
-            body: test.response.data || null
-        }
+    // -- A. Création de deux pièces jointes séparées : Requête et Réponse
+    const requestAttachmentUuid = crypto.randomUUID();
+    const requestAttachmentContent = JSON.stringify({
+        method: test.request.method,
+        url: test.request.url,
+        headers: test.request.headers,
+        body: test.request.data || null
     }, null, 2);
 
     fs.writeFileSync(
-        path.join(outputDir, `${attachmentUuid}-attachment.json`),
-        attachmentContent
+        path.join(outputDir, `${requestAttachmentUuid}-attachment.json`),
+        requestAttachmentContent
+    );
+
+    const responseAttachmentUuid = crypto.randomUUID();
+    const responseAttachmentContent = JSON.stringify({
+        status: test.response.status,
+        responseTime: test.response.responseTime,
+        headers: test.response.headers,
+        body: test.response.data || null
+    }, null, 2);
+
+    fs.writeFileSync(
+        path.join(outputDir, `${responseAttachmentUuid}-attachment.json`),
+        responseAttachmentContent
     );
 
     // -- B. Transformation des assertions en "Steps" (Étapes Allure)
     const steps = [];
-    
+
+    // Helper pour construire un step avec statusDetails si erreur
+    const buildStep = (name, item) => {
+        const step = {
+            name,
+            status: item.status === 'pass' ? 'passed' : 'failed',
+            stage: 'finished',
+            start: currentTime,
+            stop: currentTime
+        };
+        if (item.status !== 'pass' && item.error) {
+            step.statusDetails = { message: item.error };
+        }
+        return step;
+    };
+
+    // Ajout des Pre-Request Tests
+    if (test.preRequestTestResults && test.preRequestTestResults.length > 0) {
+        test.preRequestTestResults.forEach(preTest => {
+            steps.push(buildStep(`Pre-Request: ${preTest.description}`, preTest));
+        });
+    }
+
     // Ajout des Assertions
     if (test.assertionResults && test.assertionResults.length > 0) {
         test.assertionResults.forEach(assertion => {
-            steps.push({
-                name: `Assertion: ${assertion.lhsExpr} ${assertion.operator} ${assertion.rhsOperand}`,
-                status: assertion.status === 'pass' ? 'passed' : 'failed',
-                stage: 'finished',
-                start: currentTime,
-                stop: currentTime
-            });
+            steps.push(buildStep(
+                `Assertion: ${assertion.lhsExpr} ${assertion.operator} ${assertion.rhsOperand}`,
+                assertion
+            ));
         });
     }
 
     // Ajout des Tests (Scripts)
     if (test.testResults && test.testResults.length > 0) {
         test.testResults.forEach(scriptTest => {
-            steps.push({
-                name: `Test: ${scriptTest.description}`,
-                status: scriptTest.status === 'pass' ? 'passed' : 'failed',
-                stage: 'finished',
-                start: currentTime,
-                stop: currentTime
-            });
+            steps.push(buildStep(`Test: ${scriptTest.description}`, scriptTest));
         });
     }
 
-    // -- C. Construction de l'objet de test Allure
+    // Ajout des Post-Response Tests
+    if (test.postResponseTestResults && test.postResponseTestResults.length > 0) {
+        test.postResponseTestResults.forEach(postTest => {
+            steps.push(buildStep(`Post-Response: ${postTest.description}`, postTest));
+        });
+    }
+
+    // -- C. Dérivation de l'arborescence de dossiers depuis le champ "path"
+    // Le dernier segment de path correspond au fichier (dont le nom d'affichage est "name")
+    // Les segments précédents représentent les dossiers de la collection Bruno
+    const pathParts = test.path.split('/');
+    const folders = pathParts.slice(0, -1); // tout sauf le dernier segment (fichier)
+
+    const hierarchyLabels = [{ name: "framework", value: "bruno" }];
+    if (folders.length >= 1) hierarchyLabels.push({ name: "parentSuite", value: folders[0] });
+    if (folders.length >= 2) hierarchyLabels.push({ name: "suite", value: folders[1] });
+    if (folders.length >= 3) hierarchyLabels.push({ name: "subSuite", value: folders.slice(2).join('/') });
+
+    // -- D. Construction de l'objet de test Allure
     const allureResult = {
         uuid: testUuid,
         name: test.name || "Requête sans nom",
-        historyId: crypto.createHash('md5').update(test.name + test.request.url).digest('hex'),
+        historyId: crypto.createHash('md5').update(test.path).digest('hex'),
         status: allureStatus,
         stage: 'finished',
         steps: steps,
         attachments: [
             {
-                name: "Request & Response Data",
-                source: `${attachmentUuid}-attachment.json`,
+                name: "Request Data",
+                source: `${requestAttachmentUuid}-attachment.json`,
+                type: "application/json"
+            },
+            {
+                name: "Response Data",
+                source: `${responseAttachmentUuid}-attachment.json`,
                 type: "application/json"
             }
         ],
-        labels: [
-            { name: "framework", value: "bruno" },
-            { name: "suite", value: "API Tests" }
+        parameters: [
+            { name: "method", value: test.request.method },
+            { name: "url", value: test.request.url }
         ],
+        labels: hierarchyLabels,
         start: currentTime,
         stop: currentTime + durationMs
     };
@@ -109,7 +159,7 @@ results.forEach(test => {
     // Incrémenter le temps pour que la chronologie Allure soit logique
     currentTime += durationMs;
 
-    // -- D. Écriture du fichier de résultat Allure (.json)
+    // -- E. Écriture du fichier de résultat Allure (.json)
     fs.writeFileSync(
         path.join(outputDir, `${testUuid}-result.json`),
         JSON.stringify(allureResult, null, 2)
