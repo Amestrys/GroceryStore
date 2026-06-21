@@ -22,12 +22,17 @@ node bruno-to-allure.js <chemin_vers_dossier>
 ```` 
 
 
-Générer et ouvrir le rapport Allure :
+Générer le rapport Allure v3 (interface Awesome) :
 ````
-npx allure serve allure-results
+npx allure awesome allure-results -o allure-report
 ```` 
 
-Générer et ouvrir le rapport Allure :
+Ouvrir le rapport Allure v3 :
 ````
-npx allure generate allure-results --clean -o allure-report
+npx allure open allure-report
+```` 
+
+Générer et ouvrir en une commande :
+````
+npx allure awesome allure-results -o allure-report ; npx allure open allure-report
 ```` 

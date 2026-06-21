@@ -37,7 +37,7 @@ let currentTime = Date.now();
 // 2. Transformer chaque résultat en format Allure 2
 results.forEach(test => {
     const testUuid = crypto.randomUUID();
-    const durationMs = test.runDuration * 1000;
+    const durationMs = Math.round(test.runDuration * 1000);
     const allureStatus = test.status === 'pass' ? 'passed' : 'failed';
 
     // -- A. Création de deux pièces jointes séparées : Requête et Réponse
@@ -131,7 +131,9 @@ results.forEach(test => {
     const allureResult = {
         uuid: testUuid,
         name: test.name || "Requête sans nom",
+        fullName: test.path,
         historyId: crypto.createHash('md5').update(test.path).digest('hex'),
+        testCaseId: crypto.createHash('md5').update(test.path).digest('hex'),
         status: allureStatus,
         stage: 'finished',
         steps: steps,
@@ -157,7 +159,7 @@ results.forEach(test => {
     };
 
     // Incrémenter le temps pour que la chronologie Allure soit logique
-    currentTime += durationMs;
+    currentTime = Math.round(currentTime + durationMs);
 
     // -- E. Écriture du fichier de résultat Allure (.json)
     fs.writeFileSync(

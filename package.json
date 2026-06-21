@@ -19,6 +19,6 @@
   },
   "homepage": "https://github.com/Amestrys/GroceryStore#readme",
   "devDependencies": {
-    "allure-commandline": "^2.40.0"
+    "allure": "latest"
   }
 }
